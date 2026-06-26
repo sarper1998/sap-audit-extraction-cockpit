@@ -1,0 +1,15 @@
+{
+  "name": "audit-extraction-cockpit-api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@sap-cloud-sdk/http-client": "^3.26.0",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

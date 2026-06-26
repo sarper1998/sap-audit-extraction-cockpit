@@ -1,0 +1,31 @@
+{
+  "xsappname": "audit-extraction-cockpit",
+  "tenant-mode": "dedicated",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.AuditViewer",
+      "description": "View audit extractor metadata and generated run plans"
+    },
+    {
+      "name": "$XSAPPNAME.AuditOperator",
+      "description": "Prepare audit extraction run plans"
+    }
+  ],
+  "role-templates": [
+    {
+      "name": "AuditViewer",
+      "description": "Audit cockpit viewer",
+      "scope-references": [
+        "$XSAPPNAME.AuditViewer"
+      ]
+    },
+    {
+      "name": "AuditOperator",
+      "description": "Audit cockpit operator",
+      "scope-references": [
+        "$XSAPPNAME.AuditViewer",
+        "$XSAPPNAME.AuditOperator"
+      ]
+    }
+  ]
+}

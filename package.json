@@ -1,0 +1,11 @@
+{
+  "name": "audit-extraction-cockpit",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "metadata": "node tools/extract-audit-metadata.js",
+    "start": "python3 -m http.server 8080 --directory app/audit-cockpit",
+    "check": "node --check app/audit-cockpit/app.js && node --check tools/extract-audit-metadata.js && node --check srv/server.js",
+    "build": "npm run check"
+  }
+}

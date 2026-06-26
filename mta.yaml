@@ -1,0 +1,104 @@
+_schema-version: "3.3"
+ID: audit-extraction-cockpit
+version: 1.0.0
+description: SAP BTP HTML5 cockpit for SAP audit extraction metadata
+
+parameters:
+  enable-parallel-deployments: true
+
+modules:
+  - name: audit-extraction-cockpit-router
+    type: approuter.nodejs
+    path: app/router
+    parameters:
+      disk-quota: 256M
+      memory: 256M
+    requires:
+      - name: audit-extraction-cockpit-xsuaa
+      - name: audit-extraction-cockpit-html5-runtime
+      - name: audit-extraction-cockpit-destination
+      - name: audit-extraction-cockpit-api-url
+        group: destinations
+        properties:
+          name: audit-extraction-api
+          url: ~{srv-url}
+          forwardAuthToken: true
+
+  - name: audit-extraction-cockpit-api
+    type: nodejs
+    path: srv
+    parameters:
+      disk-quota: 512M
+      memory: 256M
+    provides:
+      - name: audit-extraction-cockpit-api-url
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: audit-extraction-cockpit-xsuaa
+      - name: audit-extraction-cockpit-destination
+    properties:
+      S4_DESTINATION: S4HANA_AUDIT_BACKEND
+      S4_ALLOWED_PREFIXES: /sap/opu/odata,/sap/opu/odata4,/sap/bc/http/sap
+
+  - name: audit-extraction-cockpit-ui
+    type: html5
+    path: app/audit-cockpit
+    build-parameters:
+      builder: custom
+      commands:
+        - npm run build
+      supported-platforms: []
+
+  - name: audit-extraction-cockpit-content
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: audit-extraction-cockpit-html5-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - name: audit-extraction-cockpit-ui
+          artifacts:
+            - ./*
+          target-path: resources/audit-extraction-cockpit-ui
+
+resources:
+  - name: audit-extraction-cockpit-xsuaa
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+
+  - name: audit-extraction-cockpit-html5-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+
+  - name: audit-extraction-cockpit-html5-runtime
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-runtime
+
+  - name: audit-extraction-cockpit-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            destinations:
+              - Name: S4HANA_AUDIT_BACKEND
+                Type: HTTP
+                URL: https://s4hana.example.invalid
+                ProxyType: Internet
+                Authentication: NoAuthentication
+                HTML5.DynamicDestination: true
+            existing_destinations_policy: update

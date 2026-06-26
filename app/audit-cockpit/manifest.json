@@ -1,0 +1,27 @@
+{
+  "_version": "1.60.0",
+  "sap.app": {
+    "id": "com.audit.extraction.cockpit",
+    "type": "application",
+    "title": "SAP Audit Extraction Cockpit",
+    "description": "BTP cockpit for a read-only SAP audit extraction program.",
+    "applicationVersion": {
+      "version": "1.0.0"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "audit-extraction-cockpit"
+  },
+  "sap.ui": {
+    "technology": "HTML5",
+    "icons": {
+      "icon": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  }
+}

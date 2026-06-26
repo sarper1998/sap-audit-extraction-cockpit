@@ -1,0 +1,9 @@
+{
+  "name": "audit-extraction-cockpit-ui",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node --check app.js",
+    "start": "python3 -m http.server 8080 --directory ."
+  }
+}

@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SAP Audit Extraction Cockpit</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.json" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true">SA</div>
+          <div>
+            <p class="eyebrow">SAP BTP HTML5 App</p>
+            <h1>SAP Audit Extraction Cockpit</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <span class="status-pill status-ready">Read-only source</span>
+          <span class="status-pill status-neutral" id="apiStatus">API checking</span>
+          <button class="theme-button" id="themeButton" type="button" title="Toggle theme">
+            <span class="theme-icon" aria-hidden="true"></span>
+            <span id="themeLabel">Dark</span>
+          </button>
+          <button class="icon-button" id="downloadPlanButton" type="button" title="Download run plan">
+            <span aria-hidden="true">↓</span>
+            <span class="sr-only">Download run plan</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="workspace">
+        <aside class="sidebar" aria-label="Primary">
+          <button class="nav-item is-active" type="button" data-view="overview">Overview</button>
+          <button class="nav-item" type="button" data-view="catalogue">Extract Catalogue</button>
+          <button class="nav-item" type="button" data-view="outputs">Output Files</button>
+          <button class="nav-item" type="button" data-view="architecture">BTP Target</button>
+          <button class="nav-item" type="button" data-view="source">Source Map</button>
+        </aside>
+
+        <main class="content">
+          <section class="view is-active" id="overview" aria-labelledby="overviewTitle">
+            <div class="section-head hero-head">
+              <div>
+                <p class="eyebrow">Extractor</p>
+                <h2 id="overviewTitle">SAP audit extractor</h2>
+                <p class="section-subtitle">BTP-ready cockpit for extraction scope, run planning, output inventory, and backend API routing.</p>
+              </div>
+              <div class="inline-meta" id="sourceMeta"></div>
+            </div>
+
+            <div class="metric-grid" id="metrics"></div>
+
+            <section class="readiness-strip" aria-label="Readiness">
+              <div class="readiness-item">
+                <span>Integration</span>
+                <strong>S/4 API adapter</strong>
+                <small id="integrationReadiness">Destination pending</small>
+              </div>
+              <div class="readiness-item">
+                <span>Security</span>
+                <strong>XSUAA route guard</strong>
+                <small>Roles prepared</small>
+              </div>
+              <div class="readiness-item">
+                <span>Evidence</span>
+                <strong>ACTT inventory</strong>
+                <small>196 outputs mapped</small>
+              </div>
+              <div class="readiness-item">
+                <span>Deployment</span>
+                <strong>MTA package</strong>
+                <small>HTML5 + API service</small>
+              </div>
+            </section>
+
+            <div class="split-layout">
+              <section class="panel" aria-labelledby="runSetupTitle">
+                <div class="panel-head">
+                  <h3 id="runSetupTitle">Run Setup</h3>
+                  <span class="status-pill" id="runStatus">Draft</span>
+                </div>
+                <form class="run-form" id="runForm">
+                  <div class="segmented" role="group" aria-label="Processing mode">
+                    <button class="segment is-selected" type="button" data-mode="Background">Background</button>
+                    <button class="segment" type="button" data-mode="Foreground">Foreground</button>
+                  </div>
+                  <label>
+                    <span>Client</span>
+                    <input name="client" value="100" maxlength="3" inputmode="numeric" />
+                  </label>
+                  <label>
+                    <span>Start Date</span>
+                    <input name="startDate" type="date" />
+                  </label>
+                  <label>
+                    <span>End Date</span>
+                    <input name="endDate" type="date" />
+                  </label>
+                  <label class="wide">
+                    <span>Output Path</span>
+                    <input name="outputPath" value="/usr/sap/audit/extracts/" />
+                  </label>
+                  <label>
+                    <span>Partition Records</span>
+                    <input name="partition" value="100000" inputmode="numeric" />
+                  </label>
+                  <label class="toggle">
+                    <input name="expertMode" type="checkbox" />
+                    <span>Expert Mode</span>
+                  </label>
+                  <label class="wide">
+                    <span>Extract Scope</span>
+                    <input name="tableList" placeholder="AGR_USERS, USR02, CDHDR" />
+                  </label>
+                  <div class="form-actions wide">
+                    <button class="primary-button" id="planButton" type="button">Generate Plan</button>
+                    <button class="secondary-button" id="validateButton" type="button">Validate</button>
+                  </div>
+                </form>
+              </section>
+
+              <section class="panel" aria-labelledby="planTitle">
+                <div class="panel-head">
+                  <h3 id="planTitle">Extraction Plan</h3>
+                  <span class="status-pill status-info" id="planScope">Full scope</span>
+                </div>
+                <div class="progress-block">
+                  <div class="progress-row">
+                    <span>Preparation</span>
+                    <strong id="preparationValue">0%</strong>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-bar" id="preparationBar"></div>
+                  </div>
+                </div>
+                <div class="run-summary" id="runSummary"></div>
+                <div class="timeline" id="timeline"></div>
+              </section>
+            </div>
+
+            <section class="panel" aria-labelledby="groupTitle">
+              <div class="panel-head">
+                <h3 id="groupTitle">Audit Domains</h3>
+                <span class="status-pill status-neutral" id="domainCount"></span>
+              </div>
+              <div class="domain-grid" id="domainGrid"></div>
+            </section>
+          </section>
+
+          <section class="view" id="catalogue" aria-labelledby="catalogueTitle">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Data model</p>
+                <h2 id="catalogueTitle">Extract Catalogue</h2>
+              </div>
+              <span class="status-pill status-neutral" id="catalogueCount"></span>
+            </div>
+
+            <section class="panel">
+              <div class="filter-bar">
+                <label>
+                  <span>Search</span>
+                  <input id="tableSearch" placeholder="Extract, field, domain" />
+                </label>
+                <label>
+                  <span>Domain</span>
+                  <select id="categoryFilter"></select>
+                </label>
+                <label class="toggle compact">
+                  <input id="optionalFilter" type="checkbox" />
+                  <span>Optional only</span>
+                </label>
+                <label class="toggle compact">
+                  <input id="outputFilter" type="checkbox" />
+                  <span>With output</span>
+                </label>
+              </div>
+              <div class="catalogue-layout">
+                <div class="table-wrap">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Extract</th>
+                        <th>Domain</th>
+                        <th>Fields</th>
+                        <th>Output</th>
+                        <th>Mode</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tableRows"></tbody>
+                  </table>
+                </div>
+                <aside class="detail-pane" id="tableDetail"></aside>
+              </div>
+            </section>
+          </section>
+
+          <section class="view" id="outputs" aria-labelledby="outputsTitle">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Files</p>
+                <h2 id="outputsTitle">ACTT Output Inventory</h2>
+              </div>
+              <span class="status-pill status-neutral" id="outputCount"></span>
+            </div>
+
+            <section class="panel">
+              <div class="filter-bar">
+                <label>
+                  <span>Search</span>
+                  <input id="outputSearch" placeholder="File, source, type" />
+                </label>
+                <label>
+                  <span>Type</span>
+                  <select id="outputTypeFilter"></select>
+                </label>
+              </div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>File</th>
+                      <th>Type</th>
+                      <th>Domain</th>
+                      <th>Source</th>
+                      <th>Delimiter</th>
+                    </tr>
+                  </thead>
+                  <tbody id="outputRows"></tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <section class="view" id="architecture" aria-labelledby="architectureTitle">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Deployment</p>
+                <h2 id="architectureTitle">BTP Target Design</h2>
+              </div>
+              <span class="status-pill status-ready">HTML5 + Approuter</span>
+            </div>
+
+            <section class="panel">
+              <div class="architecture-grid">
+                <div class="architecture-map" id="architectureMap"></div>
+                <div>
+                  <h3>Deployment Units</h3>
+                  <ul class="stack-list" id="architectureList"></ul>
+                  <div class="command-block">
+                    <span>Deploy</span>
+                    <code>mbt build && cf deploy mta_archives/audit-extraction-cockpit_1.0.0.mtar</code>
+                    <button class="icon-button small" id="copyDeployButton" type="button" title="Copy deploy command">
+                      <span aria-hidden="true">□</span>
+                      <span class="sr-only">Copy deploy command</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <section class="view" id="source" aria-labelledby="sourceTitle">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Source</p>
+                <h2 id="sourceTitle">ABAP Source Map</h2>
+              </div>
+              <span class="status-pill status-neutral">Drive backed</span>
+            </div>
+
+            <section class="panel">
+              <div class="source-grid">
+                <div>
+                  <h3>Selection Screen Mapping</h3>
+                  <div class="input-list" id="inputList"></div>
+                </div>
+                <div>
+                  <h3>Control Coverage</h3>
+                  <div class="control-list" id="controlList"></div>
+                </div>
+              </div>
+            </section>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

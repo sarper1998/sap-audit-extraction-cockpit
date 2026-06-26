@@ -2,6 +2,8 @@
 
 SAP BTP cockpit for planning audit extractions, reviewing extraction scope, visualizing ACTT outputs, and routing S/4HANA access through an API adapter.
 
+![SAP Audit Extraction Cockpit dark mode preview](audit-cockpit-dark.png)
+
 Suggested GitHub repository description:
 
 ```text
