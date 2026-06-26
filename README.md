@@ -1,8 +1,6 @@
 # SAP Audit Extraction Cockpit
 
-BTP-ready cockpit that modernizes a legacy SAP audit extraction report into a guided HTML5 app, extraction metadata catalogue, run-plan generator, and S/4HANA API adapter.
-
-![SAP Audit Extraction Cockpit dark mode preview](audit-cockpit-dark.png)
+SAP BTP cockpit for planning audit extractions, reviewing extraction scope, visualizing ACTT outputs, and routing S/4HANA access through an API adapter.
 
 Suggested GitHub repository description:
 
@@ -12,12 +10,12 @@ SAP BTP HTML5 cockpit for planning audit extractions, visualizing ACTT outputs, 
 
 ## What This App Does
 
-This workspace contains a SAP BTP application generated from legacy ABAP audit extractor metadata.
+This repository contains a SAP BTP application for audit extraction planning and S/4HANA integration.
 
 The app currently provides:
 
 - Guided extraction run setup for client, date range, output path, processing mode, and expert scope.
-- Parsed audit domain coverage from the ABAP source.
+- Audit domain coverage.
 - SAP source object and field catalogue.
 - `.ACTT` output inventory.
 - Dark/light HTML5 cockpit UI.
@@ -25,9 +23,7 @@ The app currently provides:
 - Node.js API adapter exposed under `/audit-api`.
 - BTP deployment structure with MTA, destination, HTML5 app, and service modules.
 
-The original ABAP source should be kept outside the public repository. This repository includes the generated cockpit metadata needed to run the demo locally.
-
-Generated cockpit metadata is written to:
+The repository includes demo metadata for local preview:
 
 ```text
 app/audit-cockpit/data/audit-program.json
@@ -91,20 +87,6 @@ Local mode uses the generated static metadata file. If `/audit-api` is unavailab
 
 ```text
 app/audit-cockpit/data/audit-program.json
-```
-
-## Rebuild Metadata From Private Source
-
-The metadata generator can parse a private ABAP source file and rebuild the cockpit catalogue. Keep the private source outside the repository and pass its path explicitly:
-
-```sh
-AUDIT_SOURCE_PATH=/path/to/private/Audit_Programi.txt npm run metadata
-```
-
-Expected output:
-
-```text
-187 source definitions, 196 output files
 ```
 
 ## API Adapter
@@ -270,12 +252,6 @@ Use this list before calling the app complete:
 - No sensitive customer, system, credential, or extracted business data is committed.
 
 ## Useful Commands
-
-Rebuild generated metadata from a private source file:
-
-```sh
-AUDIT_SOURCE_PATH=/path/to/private/Audit_Programi.txt npm run metadata
-```
 
 Run local preview:
 
